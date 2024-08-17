@@ -1,5 +1,9 @@
 "use strict";
 const { Model } = require("sequelize");
+
+const bcrypt = require("bcrypt");
+const {ServerConfig} =  require('../config/server-config');
+
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -34,5 +38,15 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "User",
     }
   );
+
+  User.beforeCreate(function encrypt(user) {
+    // this is the plane Js Object which is used to create a new record in the mysql table
+    console.log("User Password Before Encrypt", user);
+    const encryptedPassword = bcrypt.hashSync(user.password, +ServerConfig.SALT_ROUND);
+    user.password = encryptedPassword;
+    console.log("User Password After Encrypt", user);
+
+  });
+
   return User;
 };
